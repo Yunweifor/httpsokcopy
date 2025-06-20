@@ -87,18 +87,34 @@ install_dependencies() {
         log_warn "未知的操作系统，请手动安装依赖: curl wget git mysql-server"
     fi
 
-    # 安装Go 1.21.13
-    GO_VERSION=1.21.13
-    GO_TARBALL=go$GO_VERSION.linux-amd64.tar.gz
-    log_info "下载并安装Go $GO_VERSION ..."
-    wget -q https://go.dev/dl/$GO_TARBALL -O /tmp/$GO_TARBALL
-    rm -rf /usr/local/go
-    tar -C /usr/local -xzf /tmp/$GO_TARBALL
-    export PATH=/usr/local/go/bin:$PATH
-    if ! grep -q '/usr/local/go/bin' /etc/profile; then
-        echo 'export PATH=/usr/local/go/bin:$PATH' >> /etc/profile
+    # 安装Go 1.21.13（仅当当前Go版本不满足要求时）
+    REQUIRED_GO_VERSION=1.21
+    CURRENT_GO_VERSION="$(go version 2>/dev/null | awk '{print $3}' | sed 's/go//')"
+    if [ -z "$CURRENT_GO_VERSION" ]; then
+        INSTALL_GO=1
+    else
+        MAJOR_MINOR=$(echo $CURRENT_GO_VERSION | awk -F. '{print $1 "." $2}')
+        if [ "$(echo -e "$MAJOR_MINOR\n$REQUIRED_GO_VERSION" | sort -V | head -n1)" != "$REQUIRED_GO_VERSION" ]; then
+            INSTALL_GO=1
+        else
+            INSTALL_GO=0
+        fi
     fi
-    go version
+    if [ "$INSTALL_GO" = "1" ]; then
+        GO_VERSION=1.21.13
+        GO_TARBALL=go$GO_VERSION.linux-amd64.tar.gz
+        log_info "下载并安装Go $GO_VERSION ..."
+        wget -q https://go.dev/dl/$GO_TARBALL -O /tmp/$GO_TARBALL
+        rm -rf /usr/local/go
+        tar -C /usr/local -xzf /tmp/$GO_TARBALL
+        export PATH=/usr/local/go/bin:$PATH
+        if ! grep -q '/usr/local/go/bin' /etc/profile; then
+            echo 'export PATH=/usr/local/go/bin:$PATH' >> /etc/profile
+        fi
+        go version
+    else
+        log_info "当前Go版本($CURRENT_GO_VERSION)已满足要求，无需重新安装。"
+    fi
     
     log_info "依赖安装完成"
 }
@@ -183,29 +199,12 @@ create_directories() {
 configure_app() {
     log_step "配置应用"
     
-    # 创建配置文件
-    log_info "创建配置文件..."
-    cat > $CONFIG_DIR/config.yaml << EOF
-app:
-  name: $APP_NAME
-  version: $APP_VERSION
-  port: $APP_PORT
-  log_dir: $LOG_DIR
-  data_dir: $DATA_DIR
-
-database:
-  driver: mysql
-  host: localhost
-  port: $DB_PORT
-  name: $DB_NAME
-  user: $DB_USER
-  password: $DB_PASS
-
-acme:
-  path: /usr/local/bin/acme.sh
-  default_ca: letsencrypt
-  default_encryption: ECC
-EOF
+    # 创建配置目录
+    mkdir -p /opt/httpsok/configs
+    
+    # 复制config.json到部署目录
+    log_info "复制config.json配置文件..."
+    cp ./configs/config.json /opt/httpsok/configs/config.json
     
     # 复制acme.sh
     log_info "配置acme.sh..."

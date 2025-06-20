@@ -1,9 +1,9 @@
 -- httpsok系统数据库结构
 -- 基于Go+MySQL的httpsok系统复刻版
 
--- 创建数据库
-CREATE DATABASE IF NOT EXISTS httpsok CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
+-- 如果数据库已存在，先删除再创建
+DROP DATABASE IF EXISTS httpsok;
+CREATE DATABASE httpsok CHARACTER SET utf8mb4 COLLATE=utf8mb4_unicode_ci;
 USE httpsok;
 
 -- 用户表

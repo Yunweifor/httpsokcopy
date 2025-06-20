@@ -20,7 +20,8 @@
     "default_ca": "letsencrypt",
     "default_encryption": "ECC",
     "renew_before_days": 30,
-    "script_path": "/usr/local/bin/acme.sh"
+    "script_path": "/usr/local/bin/acme.sh",
+    "storage_path": "/etc/acme.sh"
   },
   "alert": {
     "default_expiry_alert_days": [
