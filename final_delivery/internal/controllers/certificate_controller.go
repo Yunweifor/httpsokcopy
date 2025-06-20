@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -850,13 +849,23 @@ func (c *CertificateController) DownloadCertificate(ctx *gin.Context) {
 		response = gin.H{
 			"cert": cert.CertData.String,
 			"key":  cert.KeyData.String,
-			"chain": cert.ChainData.Valid ? cert.ChainData.String : "",
+			"chain": func() string {
+				if cert.ChainData.Valid {
+					return cert.ChainData.String
+				}
+				return ""
+			}(),
 		}
 	case "apache":
 		response = gin.H{
 			"cert": cert.CertData.String,
 			"key":  cert.KeyData.String,
-			"chain": cert.ChainData.Valid ? cert.ChainData.String : "",
+			"chain": func() string {
+				if cert.ChainData.Valid {
+					return cert.ChainData.String
+				}
+				return ""
+			}(),
 		}
 	case "pem":
 		// 合并证书和链

@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 初始化管理员用户
-INSERT INTO users (username, email, password_hash, full_name, role, status)
+INSERT IGNORE INTO users (username, email, password_hash, full_name, role, status)
 VALUES ('admin', 'admin@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'System Administrator', 'admin', 'active');
 
 -- 初始化系统设置

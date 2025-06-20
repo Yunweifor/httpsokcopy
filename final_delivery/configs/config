@@ -6,7 +6,7 @@ PORT=3001
 LOG_LEVEL=info
 
 # 数据库配置
-DB_HOST=172.27.133.144
+DB_HOST=8.134.130.92
 DB_PORT=3306
 DB_NAME=ssl_cert_system
 DB_USER=ssl_manager

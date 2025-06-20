@@ -74,18 +74,31 @@ check_system() {
 install_dependencies() {
     log_step "安装依赖"
     
-    # 根据不同的操作系统安装依赖
+    # 根据不同的操作系统安装依赖（不再安装系统自带golang）
     if [ -f /etc/debian_version ]; then
         log_info "使用apt安装依赖..."
         apt-get update
-        apt-get install -y curl wget git mysql-server golang-go
+        apt-get install -y curl wget git mysql-server
     elif [ -f /etc/redhat-release ]; then
         log_info "使用yum安装依赖..."
         yum -y update
-        yum -y install curl wget git mysql-server golang
+        yum -y install curl wget git mysql-server
     else
-        log_warn "未知的操作系统，请手动安装依赖: curl wget git mysql-server golang"
+        log_warn "未知的操作系统，请手动安装依赖: curl wget git mysql-server"
     fi
+
+    # 安装Go 1.21.13
+    GO_VERSION=1.21.13
+    GO_TARBALL=go$GO_VERSION.linux-amd64.tar.gz
+    log_info "下载并安装Go $GO_VERSION ..."
+    wget -q https://go.dev/dl/$GO_TARBALL -O /tmp/$GO_TARBALL
+    rm -rf /usr/local/go
+    tar -C /usr/local -xzf /tmp/$GO_TARBALL
+    export PATH=/usr/local/go/bin:$PATH
+    if ! grep -q '/usr/local/go/bin' /etc/profile; then
+        echo 'export PATH=/usr/local/go/bin:$PATH' >> /etc/profile
+    fi
+    go version
     
     log_info "依赖安装完成"
 }
@@ -140,6 +153,7 @@ build_app() {
     log_step "编译应用"
     
     log_info "编译后端服务..."
+    go mod tidy
     cd ./cmd
     go build -o $APP_NAME
     if [ $? -ne 0 ]; then

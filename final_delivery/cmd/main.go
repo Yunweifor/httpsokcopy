@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -25,7 +24,14 @@ func main() {
 	logger.Info("Starting httpsok service...")
 
 	// 初始化数据库连接
-	db, err := database.NewConnection(cfg.Database)
+	db, err := database.NewConnection(database.DBConfig{
+		Host:     cfg.Database.Host,
+		Port:     cfg.Database.Port,
+		User:     cfg.Database.User,
+		Password: cfg.Database.Password,
+		DBName:   cfg.Database.DBName,
+		SSLMode:  cfg.Database.SSLMode,
+	})
 	if err != nil {
 		logger.Fatal("Failed to connect to database", err)
 	}
