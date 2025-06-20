@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动部署 - HTTPSOK</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="sidebar-header mb-4">
+                        <h3 class="text-center">HTTPSOK</h3>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                仪表盘
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/certificates">
+                                <i class="bi bi-shield-lock me-2"></i>
+                                证书管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/servers">
+                                <i class="bi bi-server me-2"></i>
+                                自动部署
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/monitors">
+                                <i class="bi bi-graph-up me-2"></i>
+                                证书监控
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/settings">
+                                <i class="bi bi-gear me-2"></i>
+                                系统设置
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- 主内容区 -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">自动部署</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addServerModal">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            添加服务器
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 搜索栏 -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchInput" placeholder="搜索服务器名称、IP地址...">
+                            <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 服务器列表 -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">类型</th>
+                                <th scope="col">名称</th>
+                                <th scope="col">系统</th>
+                                <th scope="col">IP</th>
+                                <th scope="col">版本</th>
+                                <th scope="col">状态</th>
+                                <th scope="col">最后更新</th>
+                                <th scope="col">自动部署</th>
+                                <th scope="col">备注</th>
+                                <th scope="col">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="serverList">
+                            <!-- 服务器列表将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center" id="pagination">
+                        <!-- 分页将通过JavaScript动态加载 -->
+                    </ul>
+                </nav>
+            </main>
+        </div>
+    </div>
+
+    <!-- 添加服务器模态框 -->
+    <div class="modal fade" id="addServerModal" tabindex="-1" aria-labelledby="addServerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addServerModalLabel">添加服务器</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addServerForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="serverNameInput" class="form-label">服务器名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="serverNameInput" placeholder="Web服务器01" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="serverTypeSelect" class="form-label">服务器类型 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="serverTypeSelect" required>
+                                    <option value="nginx">Nginx</option>
+                                    <option value="apache">Apache</option>
+                                    <option value="other">其他</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="hostnameInput" class="form-label">主机名 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="hostnameInput" placeholder="example.com" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ipAddressInput" class="form-label">IP地址 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="ipAddressInput" placeholder="192.168.1.100" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="osTypeInput" class="form-label">操作系统类型 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="osTypeInput" placeholder="CentOS Linux" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="osVersionInput" class="form-label">操作系统版本</label>
+                                <input type="text" class="form-control" id="osVersionInput" placeholder="7 (Core)">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="versionInput" class="form-label">Web服务器版本</label>
+                                <input type="text" class="form-control" id="versionInput" placeholder="1.17.0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="portInput" class="form-label">SSH端口</label>
+                                <input type="number" class="form-control" id="portInput" placeholder="22" value="22">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="authTypeSelect" class="form-label">认证方式 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="authTypeSelect" required>
+                                    <option value="password">密码</option>
+                                    <option value="key">密钥</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="usernameInput" class="form-label">用户名 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="usernameInput" placeholder="root" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="passwordGroup">
+                            <label for="passwordInput" class="form-label">密码 <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="passwordInput" placeholder="请输入密码">
+                        </div>
+
+                        <div class="mb-3 d-none" id="privateKeyGroup">
+                            <label for="privateKeyInput" class="form-label">私钥 <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="privateKeyInput" rows="5" placeholder="请输入私钥内容"></textarea>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="autoDeployCheck">
+                            <label class="form-check-label" for="autoDeployCheck">启用自动部署</label>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notesInput" class="form-label">备注</label>
+                            <input type="text" class="form-control" id="notesInput" placeholder="可选">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="testConnectionBtn">测试连接</button>
+                    <button type="button" class="btn btn-success" id="saveServerBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 服务器详情模态框 -->
+    <div class="modal fade" id="serverDetailModal" tabindex="-1" aria-labelledby="serverDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serverDetailModalLabel">服务器详情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="serverDetailTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">基本信息</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="certs-tab" data-bs-toggle="tab" data-bs-target="#certs-tab-pane" type="button" role="tab" aria-controls="certs-tab-pane" aria-selected="false">已部署证书</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-3" id="serverDetailTabContent">
+                        <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" aria-labelledby="info-tab" tabindex="0">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <p class="fw-bold">服务器名称</p>
+                                    <p id="detailName"></p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="fw-bold">服务器类型</p>
+                                    <p id="detailType"></p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="fw-bold">IP地址</p>
+                                    <p id="detailIP"></p>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <p class="fw-bold">操作系统</p>
+                                    <p id="detailOS"></p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="fw-bold">Web服务器版本</p>
+                                    <p id="detailVersion"></p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="fw-bold">状态</p>
+                                    <p id="detailStatus"></p>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <p class="fw-bold">备注</p>
+                                    <p id="detailNotes"></p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editServerNotesInput" class="form-label">修改备注</label>
+                                <input type="text" class="form-control" id="editServerNotesInput">
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="certs-tab-pane" role="tabpanel" aria-labelledby="certs-tab" tabindex="0">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>域名</th>
+                                            <th>证书路径</th>
+                                            <th>密钥路径</th>
+                                            <th>状态</th>
+                                            <th>最后部署时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="deployedCertsList">
+                                        <!-- 已部署证书列表将通过JavaScript动态加载 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-primary" id="deployCertBtn" data-bs-toggle="modal" data-bs-target="#deployCertModal">
+                                    <i class="bi bi-upload me-1"></i>
+                                    部署新证书
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="testConnectionDetailBtn">测试连接</button>
+                    <button type="button" class="btn btn-success" id="saveServerNotesBtn">保存备注</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 部署证书模态框 -->
+    <div class="modal fade" id="deployCertModal" tabindex="-1" aria-labelledby="deployCertModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deployCertModalLabel">部署证书</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="deployCertForm">
+                        <div class="mb-3">
+                            <label for="certSelect" class="form-label">选择证书 <span class="text-danger">*</span></label>
+                            <select class="form-select" id="certSelect" required>
+                                <!-- 证书选项将通过JavaScript动态加载 -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="certPathInput" class="form-label">证书路径 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="certPathInput" placeholder="/etc/nginx/certs/example.com.crt" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="keyPathInput" class="form-label">密钥路径 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="keyPathInput" placeholder="/etc/nginx/certs/example.com.key" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chainPathInput" class="form-label">证书链路径</label>
+                            <input type="text" class="form-control" id="chainPathInput" placeholder="/etc/nginx/certs/example.com.chain.pem">
+                        </div>
+                        <div class="mb-3">
+                            <label for="configPathInput" class="form-label">配置文件路径</label>
+                            <input type="text" class="form-control" id="configPathInput" placeholder="/etc/nginx/conf.d/example.com.conf">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="autoDeployCheckDeploy" checked>
+                            <label class="form-check-label" for="autoDeployCheckDeploy">启用自动部署</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="reloadServiceCheck" checked>
+                            <label class="form-check-label" for="reloadServiceCheck">部署后重载服务</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="deployNowBtn">立即部署</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本引用 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/servers.js"></script>
+    <script src="/assets/js/common.js"></script>
+</body>
+</html>
