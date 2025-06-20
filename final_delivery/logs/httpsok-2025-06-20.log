@@ -3,3 +3,14 @@
 [INFO] 2025/06/20 15:09:05 Starting httpsok service...
 [INFO] 2025/06/20 15:09:05 Database connection established
 [INFO] 2025/06/20 15:09:05 HTTP server starting on 0.0.0.0
+[INFO] 2025/06/20 16:52:25 Starting httpsok service...
+[FATAL] 2025/06/20 16:52:25 logger.go:164: Failed to connect to database: failed to ping database: dial tcp [::1]:3306: connectex: No connection could be made because the target machine actively refused it.
+[INFO] 2025/06/20 16:54:56 测试信息日志
+[DEBUG] 2025/06/20 16:54:56 logger.go:111: 测试调试日志
+[ERROR] 2025/06/20 16:54:56 logger.go:145: 测试错误日志: 测试错误
+[INFO] 2025/06/20 16:54:56 Verifying DNS challenge for domain ssl.gzyggl.com: _acme-challenge.ssl.gzyggl.com TXT k63gmnrmrqqsvr81db1y41x1ytzjie72
+[INFO] 2025/06/20 16:54:56 Issuing certificate for domains [ssl.gzyggl.com] with CA letsencrypt and encryption ECC
+[INFO] 2025/06/20 16:54:56 Verifying DNS challenge for domain ssl.gzyggl.com: _acme-challenge.ssl.gzyggl.com TXT rzh4ic1oh4ypxlt8abixomqzdkebem3r
+[INFO] 2025/06/20 16:54:56 Issuing certificate for domains [ssl.gzyggl.com] with CA letsencrypt and encryption ECC
+[INFO] 2025/06/20 16:58:03 Verifying DNS challenge for domain ssl.gzyggl.com: _acme-challenge.ssl.gzyggl.com TXT 84b7xkm4gtki8ig9ksx5djcrzwh0yk4q
+[INFO] 2025/06/20 16:58:06 Issuing certificate for domains [ssl.gzyggl.com] with CA letsencrypt and encryption ECC

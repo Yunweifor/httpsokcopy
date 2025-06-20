@@ -15,7 +15,7 @@
     "sslmode": ""
   },
   "log_level": "info",
-  "log_path": "logs",
+  "log_path": "./logs",
   "acme": {
     "default_ca": "letsencrypt",
     "default_encryption": "ECC",

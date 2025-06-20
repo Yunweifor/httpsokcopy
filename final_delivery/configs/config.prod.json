@@ -1,0 +1,35 @@
+{
+  "server": {
+    "address": "0.0.0.0",
+    "port": 3001,
+    "tls_enabled": false,
+    "tls_cert_file": "",
+    "tls_key_file": ""
+  },
+  "database": {
+    "host": "8.134.130.92",
+    "port": 3306,
+    "user": "ssl_manager",
+    "password": "169wh7bSJbqANl2PSnkwg+BauB8hlKn9GWtiCMSoJNg=",
+    "dbname": "ssl_cert_system",
+    "sslmode": ""
+  },
+  "log_level": "info",
+  "log_path": "logs",
+  "acme": {
+    "default_ca": "letsencrypt",
+    "default_encryption": "ECC",
+    "renew_before_days": 30,
+    "script_path": "/usr/local/bin/acme.sh",
+    "storage_path": "/etc/acme.sh"
+  },
+  "alert": {
+    "default_expiry_alert_days": [
+      30,
+      14,
+      7,
+      3,
+      1
+    ]
+  }
+}
