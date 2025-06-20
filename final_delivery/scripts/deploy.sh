@@ -284,11 +284,17 @@ start_service() {
 show_info() {
     log_step "安装完成"
     
+    # 动态读取端口号
+    SERVER_PORT=$(grep -o '"port"[ ]*:[ ]*[0-9]*' /opt/httpsok/configs/config.json | head -1 | grep -o '[0-9]\+')
+    if [ -z "$SERVER_PORT" ]; then
+        SERVER_PORT=8080
+    fi
+
     echo -e "${GREEN}httpsok系统已成功安装!${NC}"
     echo ""
-    echo "Web控制台: http://localhost:$APP_PORT"
-    echo "API接口: http://localhost:$APP_PORT/api/v1"
-    echo "配置文件: $CONFIG_DIR/config.yaml"
+    echo "Web控制台: http://localhost:$SERVER_PORT"
+    echo "API接口: http://localhost:$SERVER_PORT/api/v1"
+    echo "配置文件: $CONFIG_DIR/config.json"
     echo "日志目录: $LOG_DIR"
     echo "数据目录: $DATA_DIR"
     echo ""
